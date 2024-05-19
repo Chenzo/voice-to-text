@@ -4,16 +4,18 @@
 //import styles from "./TollButton.module.scss";
 
 import { useState, useEffect } from 'react'
+import Router from 'next/router';
 
 export default function VoiceToText() {
-
 
     let SpeechRecognition = null;
     let SpeechGrammarList = null;
     let SpeechRecognitionEvent = null;
-  
-    useEffect(() => {
-      console.log("Should be good");
+
+    let started = false;
+    const buildListener = () => {
+      started = true;
+      console.log("Should be good - only once");
       SpeechRecognition = window.webkitSpeechRecognition
       SpeechGrammarList = window.webkitSpeechGrammarList
       SpeechRecognitionEvent = window.webkitSpeechRecognitionEvent
@@ -38,7 +40,7 @@ export default function VoiceToText() {
 
 
         recognition.start();
-        console.log('Ready to receive a color command.');
+        console.log('.....now listening');
 
 
         recognition.onresult = function(event) {
@@ -50,11 +52,11 @@ export default function VoiceToText() {
         // These also have getters so they can be accessed like arrays.
         // The second [0] returns the SpeechRecognitionAlternative at position 0.
         // We then return the transcript property of the SpeechRecognitionAlternative object
-        var color = event.results[0][0].transcript;
-        console.log(color);
-        diagnostic.textContent = 'Result received: ' + color + '.';
-        //bg.style.backgroundColor = color;
+        var words = event.results[0][0].transcript;
+        diagnostic.textContent = '' + words + '';
         console.log('Confidence: ' + event.results[0][0].confidence);
+
+        console.log(event.results[0][0]);
         }
 
         recognition.onspeechend = function() {
@@ -62,19 +64,31 @@ export default function VoiceToText() {
             recognition.stop();
         }
 
+        recognition.onend = function() {
+          console.log('end');
+          recognition.start();
+        }
+
         recognition.onnomatch = function(event) {
-            diagnostic.textContent = "I didn't recognise that color.";
+            diagnostic.textContent = "I didn't recognise those words.";
         }
 
         recognition.onerror = function(event) {
             diagnostic.textContent = 'Error occurred in recognition: ' + event.error;
         }
+    }
+  
+    useEffect(() => {
+      console.log("Should be good");
+      if (!started) {
+        buildListener();
+      }
     }, []); 
 
     
   return (
     <div>
-        <p class="output"><em>…diagnostic messages</em></p>
+        <p className="output"><em>…</em></p>
       </div>
   );
 }
